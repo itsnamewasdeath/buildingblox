@@ -1,67 +1,106 @@
-import Link from 'next/link';
-import { Card } from 'components/card';
-import { RandomQuote } from 'components/random-quote';
-import { Markdown } from 'components/markdown';
-import { ContextAlert } from 'components/context-alert';
-import { getNetlifyContext } from 'utils';
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
-const cards = [
-    //{ text: 'Hello', linkText: 'someLink', href: '/' }
-];
-
-const contextExplainer = `
-The card below is rendered on the server based on the value of \`process.env.CONTEXT\` 
-([docs](https://docs.netlify.com/configure-builds/environment-variables/#build-metadata)):
+// Styled components for the HTML structure
+const Header = styled.header`
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
 `;
 
-const preDynamicContentExplainer = `
-The card content below is fetched by the client-side from \`/quotes/random\` (see file \`app/quotes/random/route.js\`) with a different quote shown on each page load:
+const Main = styled.main`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 `;
 
-const postDynamicContentExplainer = `
-On Netlify, Next.js Route Handlers are automatically deployed as [Serverless Functions](https://docs.netlify.com/functions/overview/).
-Alternatively, you can add Serverless Functions to any site regardless of framework, with acccess to the [full context data](https://docs.netlify.com/functions/api/).
-
-And as always with dynamic content, beware of layout shifts & flicker! (here, we aren't...)
+const Section = styled.section`
+  margin-bottom: 2rem;
 `;
 
-const ctx = getNetlifyContext();
+const H2 = styled.h2`
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.5rem;
+`;
 
-export default function Page() {
-    return (
-        <main className="flex flex-col gap-8 sm:gap-16">
-            <section className="flex flex-col items-start gap-3 sm:gap-4">
-                <ContextAlert />
-                <h1 className="mb-0">Netlify Platform Starter - Next.js</h1>
-                <p className="text-lg">Get started with Next.js and Netlify in seconds.</p>
-                <Link
-                    href="https://docs.netlify.com/frameworks/next-js/overview/"
-                    className="btn btn-lg btn-primary sm:btn-wide"
-                >
-                    Read the Docs
-                </Link>
-            </section>
-            {!!ctx && (
-                <section className="flex flex-col gap-4">
-                    <Markdown content={contextExplainer} />
-                    <RuntimeContextCard />
-                </section>
-            )}
-            <section className="flex flex-col gap-4">
-                <Markdown content={preDynamicContentExplainer} />
-                <RandomQuote />
-                <Markdown content={postDynamicContentExplainer} />
-            </section>
-            {/* !!cards?.length && <CardsGrid cards={cards} /> */}
-        </main>
-    );
+const P = styled.p`
+  color: #666;
+`;
+
+const Footer = styled.footer`
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+`;
+
+function OpenAIComponent() {
+  const [generatedContent, setGeneratedContent] = useState('');
+
+  useEffect(() => {
+    fetch('https://api.openai.com/v1/engines/davinci/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_OPENAI_API_KEY' // Replace with your OpenAI API key
+      },
+      body: JSON.stringify({
+        prompt: "Generate content based on your requirements...",
+        max_tokens: 150
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setGeneratedContent(data.choices[0].text);
+    })
+    .catch(error => console.error('Error fetching data from OpenAI:', error));
+  }, []);
+
+  return (
+    <Section>
+      <H2>Generated Content:</H2>
+      <P>{generatedContent}</P>
+    </Section>
+  );
 }
 
-function RuntimeContextCard() {
-    const title = `Netlify Context: running in ${ctx} mode.`;
-    if (ctx === 'dev') {
-        return <Card title={title} text="Next.js will rebuild any page you navigate to, including static pages." />;
-    } else {
-        return <Card title={title} text="This page was statically-generated at build time." />;
-    }
+function ChatbotComponent() {
+  // Placeholder for chatbot component, adjust as per your implementation
+  return (
+    <Section>
+      <H2>Chatbot Interface:</H2>
+      <P>Insert your Chatbot component here...</P>
+    </Section>
+  );
 }
+
+function Page() {
+  return (
+    <>
+      <Header>
+        <h1>Cents4Tents Initiative</h1>
+        <p>A Novel Temporary Housing Solution for Homeless Individuals in the United States</p>
+        <p>Created by Nick Susco II June 7th, 2024</p>
+      </Header>
+
+      <Main>
+        <OpenAIComponent />
+        <ChatbotComponent />
+      </Main>
+
+      <Footer>
+        <P>© 2024 Cents4Tents Initiative. All rights reserved.</P>
+      </Footer>
+    </>
+  );
+}
+
+export default Page;
